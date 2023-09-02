@@ -17,7 +17,7 @@ abstract A {
 }
 
 B : A {
-    c: int
+    c: int @max(3)
     d: E
 }
 
@@ -30,7 +30,7 @@ Outputs
 
 ```
 CREATE (a:B)
-SET a.c = 292067485941760
+SET a.c = 2
 SET a.d = 'B'
 SET a.a = 8565248579600384
 SET a.b = 'ktLqhqRSbU'
