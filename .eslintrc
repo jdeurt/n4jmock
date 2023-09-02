@@ -1,0 +1,5 @@
+{
+    "extends": "@jdeurt",
+
+    "ignorePatterns": ["shared/**/*", "dist/**/*"]
+}

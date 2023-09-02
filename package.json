@@ -1,0 +1,22 @@
+{
+    "name": "n4jmock",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "dev": "tsc && node dist/index.js",
+        "make": "peggy -o shared/n4jm-parser.cjs shared/n4jm.pegjs"
+    },
+    "devDependencies": {
+        "@jdeurt/eslint-config": "^3.3.0",
+        "@types/node": "^20.5.8",
+        "eslint": "^8.48.0",
+        "peggy": "^3.0.2",
+        "prettier": "^3.0.3",
+        "typescript": "^5.2.2"
+    },
+    "dependencies": {
+        "@faker-js/faker": "^8.0.2"
+    }
+}
