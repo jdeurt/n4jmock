@@ -8,21 +8,22 @@ A DSL for mocking N4J data.
 enum E {
     A
     B
-    C
+    "whoa string literal"
 }
 
+// Abstract labels are not emitted in the result
 abstract A {
     a: int
     b: string
 }
 
 B : A {
-    c: int @max(3)
+    c: int @max(3) // Supports annotations
     d: E
 }
 
 C {
-    has_b -> [B]
+    has_b -> [B] // Directed relationship
 }
 ```
 
