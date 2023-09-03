@@ -1,0 +1,8 @@
+import animals/Animal
+import animals/Mouse
+
+Cat : Animal {
+    breed: string
+
+    chases -> [Mouse]
+}

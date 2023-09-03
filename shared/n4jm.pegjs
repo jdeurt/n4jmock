@@ -39,23 +39,19 @@ start = imports:(@importList eol)? declarations:(labelDecl / enumDecl)|.., eol| 
 // utils
 word "word" = $[a-z0-9_]i+
 id "identifier" = $[a-z_]i+
-_ "whitespace" = [ \t]* { return undefined }
-eol "end of line" = _ [\n\t ]+ { return undefined }
-path "file path" = $([a-z0-9_-]+)|1.., "/"|
+_ "whitespace" = [ \t]*
+eol "end of line" = (comment? [\n\t ])+
+path "file path" = $([a-z0-9_-]i+)|1.., "/"|
 strLiteral "string literal" = '"' inner:$[^"]* '"' { return inner }
 data "data" = word / strLiteral
 tag "property tag" = "@" id:id data:("(" @data|.., listDelim| ")")? { return Token.TAG(id, data) }
 listDelim = _ "," _
 
-/*
-import file
-import path/to/my-file
-*/
 importList "import statement list" = importStmt|1.., eol|
 importStmt "import statement" = "import" _ path:importPath { return Token.IMPORT(path) }
 importPath "import path" = path
 
-labelDecl = abstr:("abstract" _)? meta:labelDeclHeader _ "{" eol data:labelDeclBody eol "}" _ {
+labelDecl = abstr:("abstract" _)? meta:labelDeclHeader _ data:("{" eol @labelDeclBody eol "}" / "{" _ "}") _ {
     const isAbstract = !!abstr;
     
     const id = meta.id;
@@ -64,7 +60,7 @@ labelDecl = abstr:("abstract" _)? meta:labelDeclHeader _ "{" eol data:labelDeclB
     const properties = [];
     const relationships = [];
 
-    for (const attr of data.attrs) {
+    for (const attr of data?.attrs ?? []) {
         if (kind(attr) === "property") {
             properties.push(attr);
         } else {
@@ -92,3 +88,5 @@ rel "relationship" =
     id:id _ direction:$("->" / "<-" / "<>" / "--") _ "[" _ refs:id|1.., listDelim| _ "]" _ tags:tag|.., _| {
         return Token.RELATIONSHIP(id, direction, refs.map(Token.LABEL_REF), tags)
     }
+
+comment = _ "//" [^\n]*

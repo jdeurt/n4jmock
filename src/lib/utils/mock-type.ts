@@ -1,10 +1,10 @@
 import { faker } from "@faker-js/faker";
-import { KnownType } from "../constants/known-type.js";
-import type { EnumToken } from "../structs/tokens/enum.js";
-import type { PropertyToken } from "../structs/tokens/property.js";
-import { KnownTag } from "../constants/known-tag.js";
+import { KnownType } from "../../constants/known-type.js";
+import type { EnumToken } from "../../structs/tokens/enum.js";
+import type { PropertyToken } from "../../structs/tokens/property.js";
+import { KnownTag } from "./known-tag.js";
 import { randomUUID } from "node:crypto";
-import { random } from "./random.js";
+import { random } from "../../utils/random.js";
 
 export const mockBool = (prop: PropertyToken) => {
     if (KnownTag.true(prop)) {
@@ -125,7 +125,7 @@ export const mockString = (prop: PropertyToken) => {
     return faker.string.alphanumeric(10);
 };
 
-export const mockType = (type: KnownType | EnumToken, prop: PropertyToken) => {
+export const mock = (type: KnownType | EnumToken, prop: PropertyToken) => {
     switch (type) {
         case KnownType.BOOL: {
             return mockBool(prop);

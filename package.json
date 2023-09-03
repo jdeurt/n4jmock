@@ -6,14 +6,19 @@
     "type": "module",
     "scripts": {
         "dev": "tsc && node dist/index.js",
-        "make": "peggy -o shared/n4jm-parser.cjs shared/n4jm.pegjs"
+        "make": "peggy -o shared/n4jm-parser.cjs shared/n4jm.pegjs",
+        "test": "jest"
     },
     "devDependencies": {
         "@jdeurt/eslint-config": "^3.3.0",
+        "@jest/globals": "^29.6.4",
+        "@types/jest": "^29.5.4",
         "@types/node": "^20.5.8",
         "eslint": "^8.48.0",
+        "jest": "^29.6.4",
         "peggy": "^3.0.2",
         "prettier": "^3.0.3",
+        "ts-jest": "^29.1.1",
         "typescript": "^5.2.2"
     },
     "dependencies": {

@@ -1,4 +1,4 @@
-import { getTag } from "../utils.ts/tag.js";
+import { getTag } from "../utils/tag.js";
 
 export const KnownTag = {
     true: getTag("true"),

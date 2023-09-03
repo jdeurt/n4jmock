@@ -1,6 +1,6 @@
-import { tokenSymbol } from "../constants/symbols.js";
-import type { AnyToken } from "../structs/tokens/any-token.js";
-import type { TokenKind } from "../structs/tokens/token.js";
+import { tokenSymbol } from "../../constants/symbols.js";
+import type { AnyToken } from "../../structs/tokens/any-token.js";
+import type { TokenKind } from "../../structs/tokens/token.js";
 
 export const kind = (token: AnyToken) => token[tokenSymbol];
 

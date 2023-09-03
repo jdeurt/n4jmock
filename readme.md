@@ -5,37 +5,38 @@ A DSL for mocking N4J data.
 ## Usage
 
 ```dart
-enum E {
-    A
-    B
-    "whoa string literal"
+abstract Animal {
+    name: string
 }
 
-// Abstract labels are not emitted in the result
-abstract A {
-    a: int
-    b: string
+Dog : Animal {
+    breed: string
+
+    chases -> [Cat]
 }
 
-B : A {
-    c: int @max(3) // Supports annotations
-    d: E
+Cat : Animal {
+    breed: string
+
+    chases -> [Mouse]
 }
 
-C {
-    has_b -> [B] // Directed relationship
-}
+Mouse : Animal {}
 ```
 
 Outputs
 
 ```
-CREATE (a:B)
-SET a.c = 2
-SET a.d = 'B'
-SET a.a = 8565248579600384
-SET a.b = 'ktLqhqRSbU'
-CREATE (a:C)
-MATCH (a:C), (b:B)
-CREATE (a)-[:has_b]->(b)
+CREATE (Dog_0:Dog)
+SET Dog_0.breed = 'zwF7nJGoVB'
+SET Dog_0.name = 'DcxTvgQvMa'
+CREATE (Cat_0:Cat)
+SET Cat_0.breed = '5uhcLigR8u'
+SET Cat_0.name = 'W5E16sunLe'
+CREATE (Mouse_0:Mouse)
+SET Mouse_0.name = 'u6HfY7dr79'
+MATCH (Dog_1:Dog), (Cat_1:Cat)
+CREATE (Dog_1)-[:chases]->(Cat_1)
+MATCH (Cat_2:Cat), (Mouse_1:Mouse)
+CREATE (Cat_2)-[:chases]->(Mouse_1)
 ```
