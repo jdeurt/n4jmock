@@ -2,10 +2,7 @@ export const normalize = (
     strings: TemplateStringsArray,
     ...expressions: unknown[]
 ) => {
-    const raw = strings.reduce(
-        (acc, str, i) => acc + str + String(expressions[i] ?? ""),
-        ""
-    );
+    const raw = strings.reduce((acc, str, i) => acc + str + `%e`, "");
 
     let normalized = "";
     let offset: number | undefined;
@@ -22,6 +19,10 @@ export const normalize = (
         }
 
         normalized += line.slice(offset) + "\n";
+    }
+
+    for (const expr of expressions) {
+        normalized = normalized.replace("%e", String(expr ?? ""));
     }
 
     return normalized.trimEnd();
