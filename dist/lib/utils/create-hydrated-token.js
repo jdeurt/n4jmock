@@ -1,6 +1,6 @@
 export const createHydratedLabel = (labelToken, props, rels) => ({
     id: labelToken.id,
-    isAbstract: labelToken.isAbstract,
+    abstract: labelToken.abstract,
     properties: [...labelToken.properties, ...props],
     relationships: [...labelToken.relationships, ...rels],
 });

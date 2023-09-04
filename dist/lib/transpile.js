@@ -16,7 +16,7 @@ export const transpile = (hydratedLabels, types) => {
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function buildRelationshipQueries(hydratedLabels, query) {
     for (const label of hydratedLabels.values()) {
-        if (label.isAbstract) {
+        if (label.abstract) {
             continue;
         }
         for (const relationship of label.relationships) {
@@ -27,7 +27,7 @@ function buildRelationshipQueries(hydratedLabels, query) {
                         cause: ref.location,
                     });
                 }
-                if (refLabel.isAbstract) {
+                if (refLabel.abstract) {
                     throw new CompilationError(`Invalid target: ${ref.id}`, {
                         tip: "Abstract labels cannot be used as a relationship target since they are not included in the resulting query. " +
                             "If you want to use this label as a target, remove the 'abstract' keyword.",
@@ -41,7 +41,7 @@ function buildRelationshipQueries(hydratedLabels, query) {
 }
 function buildNodeCreationQueries(hydratedLabels, types, query) {
     for (const label of hydratedLabels.values()) {
-        if (label.isAbstract) {
+        if (label.abstract) {
             continue;
         }
         const mockedProps = {};

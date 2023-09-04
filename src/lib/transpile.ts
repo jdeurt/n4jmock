@@ -30,7 +30,7 @@ function buildRelationshipQueries(
     query: CypherQuery
 ) {
     for (const label of hydratedLabels.values()) {
-        if (label.isAbstract) {
+        if (label.abstract) {
             continue;
         }
 
@@ -44,7 +44,7 @@ function buildRelationshipQueries(
                     });
                 }
 
-                if (refLabel.isAbstract) {
+                if (refLabel.abstract) {
                     throw new CompilationError(`Invalid target: ${ref.id}`, {
                         tip:
                             "Abstract labels cannot be used as a relationship target since they are not included in the resulting query. " +
@@ -72,7 +72,7 @@ function buildNodeCreationQueries(
     query: CypherQuery
 ) {
     for (const label of hydratedLabels.values()) {
-        if (label.isAbstract) {
+        if (label.abstract) {
             continue;
         }
 

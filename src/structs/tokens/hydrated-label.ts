@@ -4,7 +4,7 @@ import type { RelationshipToken } from "./relationship.js";
 
 export interface HydratedLabelToken {
     id: IdToken;
-    isAbstract: boolean;
+    abstract: boolean;
     properties: PropertyToken[];
     relationships: RelationshipToken[];
 }

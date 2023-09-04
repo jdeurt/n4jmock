@@ -54,7 +54,7 @@ const hydrateLabel = (label, knownLabels, hydratedLabels, seen = new Set()) => {
         }
     }
     const hydratedLabel = createHydratedLabel(label, parentProperties, parentRelationships);
-    if (hydratedLabel.isAbstract && hydratedLabel.relationships.length > 0) {
+    if (hydratedLabel.abstract && hydratedLabel.relationships.length > 0) {
         throw new CompilationError(`Unexpected relationship in abstract label: ${hydratedLabel.id.name}.${hydratedLabel.relationships[0].id}`, {
             tip: "Abstract labels cannot contain relationships since they are not included in the resulting query.",
             cause: hydratedLabel.relationships[0].location,

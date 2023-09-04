@@ -9,7 +9,7 @@ export interface LabelToken extends Token {
     [tokenSymbol]: TokenKind.LABEL;
 
     id: IdToken;
-    isAbstract: boolean;
+    abstract: boolean;
     properties: PropertyToken[];
     relationships: RelationshipToken[];
     extending?: LabelRefToken;
