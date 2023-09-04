@@ -1,5 +1,6 @@
 Dog : Animal {
     breed: string
+    bones: string[]
 
-    chases -> [Cat]
+    chases -> [Animal]
 }

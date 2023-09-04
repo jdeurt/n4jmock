@@ -15,10 +15,12 @@ export enum TokenKind {
 export interface Location {
     source: string;
     start: {
+        offset: number;
         line: number;
         column: number;
     };
     end: {
+        offset: number;
         line: number;
         column: number;
     };

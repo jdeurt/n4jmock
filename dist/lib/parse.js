@@ -13,7 +13,7 @@ export const parse = (entrypoint, knownLabels, knownTypes) => {
     for (const modulePath of globIterateSync(`${baseDir}/**/*.n4jm`)) {
         log(`Parsing module: ${modulePath}`);
         const content = readFileSync(modulePath, "utf8");
-        sourceCode.files[modulePath] = { lines: content.split("\n") };
+        sourceCode.files[modulePath] = content;
         const { declarations } = parser.parse(content, {
             grammarSource: modulePath,
         });

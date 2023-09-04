@@ -3,4 +3,6 @@ export const sourceCode = {
 };
 export const options = {
     verbose: false,
+    properties: 1,
+    relationships: 1,
 };

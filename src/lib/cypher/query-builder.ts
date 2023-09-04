@@ -1,3 +1,4 @@
+import { options } from "../../globals.js";
 import type { CypherSerializable } from "../../types/cypher-serializable.js";
 import { Direction } from "../../types/direction.js";
 
@@ -11,15 +12,17 @@ export abstract class QueryBuilder {
             this.idCounters[label] = 0;
         }
 
-        return `${label}_${this.idCounters[label]++}`;
+        return `${label.toLowerCase()}_${this.idCounters[label]++}`;
     }
 
     toString(): string {
         return this.query;
     }
 
-    protected _createNode(id: string, label: string): this {
-        this.query += `CREATE (${id}:${label})\n`;
+    protected _createNode(id: string, labels: string[]): this {
+        this.query += `CREATE (${id}${labels
+            .map((label) => ":" + label)
+            .join("")})\n`;
 
         return this;
     }
@@ -49,17 +52,36 @@ export abstract class QueryBuilder {
         return this;
     }
 
-    protected _set(id: string, key: string, value: CypherSerializable): this;
+    protected _set(
+        id: string,
+        key: string,
+        value: CypherSerializable | CypherSerializable[]
+    ): this;
 
-    protected _set(id: string, props: Record<string, CypherSerializable>): this;
+    protected _set(
+        id: string,
+        props: Record<string, CypherSerializable | CypherSerializable[]>
+    ): this;
 
     protected _set(
         id: string,
         ...args:
-            | [string, CypherSerializable]
-            | [Record<string, CypherSerializable>]
+            | [string, CypherSerializable | CypherSerializable[]]
+            | [Record<string, CypherSerializable | CypherSerializable[]>]
     ): this {
         if (args.length === 2) {
+            if (Array.isArray(args[1])) {
+                const arr: string[] = [];
+
+                for (const x of args[1]) {
+                    arr.push(typeof x === "string" ? `'${x}'` : String(x));
+                }
+
+                this.query += `SET ${id}.${args[0]} = [${arr.join(", ")}]\n`;
+
+                return this;
+            }
+
             this.query += `SET ${id}.${args[0]} = ${
                 typeof args[1] === "string" ? `'${args[1]}'` : String(args[1])
             }\n`;

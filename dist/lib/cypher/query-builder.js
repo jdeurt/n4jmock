@@ -9,13 +9,15 @@ export class QueryBuilder {
         if (!this.idCounters[label]) {
             this.idCounters[label] = 0;
         }
-        return `${label}_${this.idCounters[label]++}`;
+        return `${label.toLowerCase()}_${this.idCounters[label]++}`;
     }
     toString() {
         return this.query;
     }
-    _createNode(id, label) {
-        this.query += `CREATE (${id}:${label})\n`;
+    _createNode(id, labels) {
+        this.query += `CREATE (${id}${labels
+            .map((label) => ":" + label)
+            .join("")})\n`;
         return this;
     }
     _createRelationship(sourceLabel, destLabel, label, direction) {
@@ -35,6 +37,14 @@ export class QueryBuilder {
     }
     _set(id, ...args) {
         if (args.length === 2) {
+            if (Array.isArray(args[1])) {
+                const arr = [];
+                for (const x of args[1]) {
+                    arr.push(typeof x === "string" ? `'${x}'` : String(x));
+                }
+                this.query += `SET ${id}.${args[0]} = [${arr.join(", ")}]\n`;
+                return this;
+            }
             this.query += `SET ${id}.${args[0]} = ${typeof args[1] === "string" ? `'${args[1]}'` : String(args[1])}\n`;
             return this;
         }

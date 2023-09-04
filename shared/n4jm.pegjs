@@ -27,7 +27,7 @@
         RELATIONSHIP: (id, direction, refs, tags, location) => _token("relationship", { id, direction, refs, tags }, location),
         ENUM: (id, members, location) => _token("enum", { id, members }, location),
         LABEL_REF: (id, location) => _token("label-ref", { id }, location),
-        TYPE_REF: (id, location) => _token("type-ref", { id }, location),
+        TYPE_REF: (id, isList, location) => _token("type-ref", { id, isList }, location),
         DATA: (content, location) => _token("data", { content }, location),
         ID: (name, location) => _token("id", { name }, location)
     };
@@ -83,7 +83,7 @@ rel "relationship" =
     }
 
 labelRef "label" = id:$id { return Token.LABEL_REF(id, location()) }
-typeRef "type" = id:$id { return Token.TYPE_REF(id, location()) }
+typeRef "type" = id:$id isList:"[]"? { return Token.TYPE_REF(id, !!isList, location()) }
 
 data "data" = content:(word / strLiteral) { return Token.DATA(content, location()) }
 

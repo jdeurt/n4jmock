@@ -8,7 +8,8 @@ export const hydrate = (knownLabels, hydratedLabels) => {
 };
 const hydrateLabel = (label, knownLabels, hydratedLabels, seen = new Set()) => {
     if (hydratedLabels.has(label.id.name)) {
-        return;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return hydratedLabels.get(label.id.name).inheritanceChain;
     }
     log(`Hydrating label ${label.id.name}`);
     if (seen.has(label.id.name)) {
@@ -20,8 +21,8 @@ const hydrateLabel = (label, knownLabels, hydratedLabels, seen = new Set()) => {
     seen.add(label.id.name);
     // Base case
     if (label.extending === undefined) {
-        hydratedLabels.set(label.id.name, createHydratedLabel(label, [], []));
-        return;
+        hydratedLabels.set(label.id.name, createHydratedLabel(label, [label.id.name], [], []));
+        return [label.id.name];
     }
     const parentLabelId = label.extending.id;
     const parentLabel = knownLabels.get(parentLabelId);
@@ -53,7 +54,7 @@ const hydrateLabel = (label, knownLabels, hydratedLabels, seen = new Set()) => {
             });
         }
     }
-    const hydratedLabel = createHydratedLabel(label, parentProperties, parentRelationships);
+    const hydratedLabel = createHydratedLabel(label, [label.id.name, ...hydratedParent.inheritanceChain], parentProperties, parentRelationships);
     if (hydratedLabel.abstract && hydratedLabel.relationships.length > 0) {
         throw new CompilationError(`Unexpected relationship in abstract label: ${hydratedLabel.id.name}.${hydratedLabel.relationships[0].id}`, {
             tip: "Abstract labels cannot contain relationships since they are not included in the resulting query.",
@@ -62,4 +63,5 @@ const hydrateLabel = (label, knownLabels, hydratedLabels, seen = new Set()) => {
     }
     log(`Hydrated: ${[...seen].join(" -> ")}`);
     hydratedLabels.set(hydratedLabel.id.name, hydratedLabel);
+    return hydratedLabel.inheritanceChain;
 };

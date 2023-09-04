@@ -6,14 +6,14 @@ import { CypherQuery } from "./cypher/cypher-query.js";
 import { Node } from "./cypher/node.js";
 import { Relationship } from "./cypher/relationship.js";
 import { CompilationError } from "./errors/compilation-error.js";
-import type { HydratedLabelToken } from "../structs/tokens/hydrated-label.js";
+import type { HydratedLabel } from "../structs/hydrated-label.js";
 
 /**
  * Assumes the passed labels are already hydrated.
  * That is, they have been populated with the properties of their parent.
  */
 export const transpile = (
-    hydratedLabels: Map<string, HydratedLabelToken>,
+    hydratedLabels: Map<string, HydratedLabel>,
     types: Map<string, EnumToken | KnownType>
 ): string => {
     const query = new CypherQuery();
@@ -26,7 +26,7 @@ export const transpile = (
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function buildRelationshipQueries(
-    hydratedLabels: Map<string, HydratedLabelToken>,
+    hydratedLabels: Map<string, HydratedLabel>,
     query: CypherQuery
 ) {
     for (const label of hydratedLabels.values()) {
@@ -47,7 +47,7 @@ function buildRelationshipQueries(
                 if (refLabel.abstract) {
                     throw new CompilationError(`Invalid target: ${ref.id}`, {
                         tip:
-                            "Abstract labels cannot be used as a relationship target since they are not included in the resulting query. " +
+                            "Abstract labels cannot be used as a relationship target since they are not included in the resulting query.\n" +
                             "If you want to use this label as a target, remove the 'abstract' keyword.",
                         cause: ref.location,
                     });
@@ -67,7 +67,7 @@ function buildRelationshipQueries(
 }
 
 function buildNodeCreationQueries(
-    hydratedLabels: Map<string, HydratedLabelToken>,
+    hydratedLabels: Map<string, HydratedLabel>,
     types: Map<string, EnumToken | KnownType>,
     query: CypherQuery
 ) {
@@ -76,7 +76,10 @@ function buildNodeCreationQueries(
             continue;
         }
 
-        const mockedProps: Record<string, CypherSerializable> = {};
+        const mockedProps: Record<
+            string,
+            CypherSerializable | CypherSerializable[]
+        > = {};
 
         for (const property of label.properties) {
             const type = types.get(property.ref.id);
@@ -91,6 +94,6 @@ function buildNodeCreationQueries(
             mockedProps[property.id] = mock(type, property);
         }
 
-        query.addNode(new Node(label.id.name).set(mockedProps));
+        query.addNode(new Node(label.inheritanceChain).set(mockedProps));
     }
 }

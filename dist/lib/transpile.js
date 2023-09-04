@@ -29,7 +29,7 @@ function buildRelationshipQueries(hydratedLabels, query) {
                 }
                 if (refLabel.abstract) {
                     throw new CompilationError(`Invalid target: ${ref.id}`, {
-                        tip: "Abstract labels cannot be used as a relationship target since they are not included in the resulting query. " +
+                        tip: "Abstract labels cannot be used as a relationship target since they are not included in the resulting query.\n" +
                             "If you want to use this label as a target, remove the 'abstract' keyword.",
                         cause: ref.location,
                     });
@@ -55,6 +55,6 @@ function buildNodeCreationQueries(hydratedLabels, types, query) {
             }
             mockedProps[property.id] = mock(type, property);
         }
-        query.addNode(new Node(label.id.name).set(mockedProps));
+        query.addNode(new Node(label.inheritanceChain).set(mockedProps));
     }
 }

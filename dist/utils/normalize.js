@@ -1,5 +1,5 @@
 export const normalize = (strings, ...expressions) => {
-    const raw = strings.reduce((acc, str, i) => acc + str + String(expressions[i] ?? ""), "");
+    const raw = strings.reduce((acc, str, i) => acc + str + `%e`, "");
     let normalized = "";
     let offset;
     for (const line of raw.split("\n")) {
@@ -11,6 +11,9 @@ export const normalize = (strings, ...expressions) => {
             offset = line.length - trimmed.length;
         }
         normalized += line.slice(offset) + "\n";
+    }
+    for (const expr of expressions) {
+        normalized = normalized.replace("%e", String(expr ?? ""));
     }
     return normalized.trimEnd();
 };

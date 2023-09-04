@@ -1,10 +1,10 @@
 import { QueryBuilder } from "./query-builder.js";
 export class Node extends QueryBuilder {
     id;
-    constructor(label) {
+    constructor(labels) {
         super();
-        this.id = QueryBuilder.id(label);
-        this._createNode(this.id, label);
+        this.id = QueryBuilder.id(labels[0]);
+        this._createNode(this.id, labels);
     }
     set(props) {
         this._set(this.id, props);

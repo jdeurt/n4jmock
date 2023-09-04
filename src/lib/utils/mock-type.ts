@@ -120,18 +120,41 @@ export const mockString = (prop: PropertyToken) => {
 export const mock = (type: KnownType | EnumToken, prop: PropertyToken) => {
     switch (type) {
         case KnownType.BOOL: {
+            if (prop.ref.isList) {
+                return Array.from({ length: 5 }, () => mockBool(prop));
+            }
+
             return mockBool(prop);
         }
         case KnownType.FLOAT: {
+            if (prop.ref.isList) {
+                return Array.from({ length: 5 }, () => mockFloat(prop));
+            }
+
             return mockFloat(prop);
         }
         case KnownType.INT: {
+            if (prop.ref.isList) {
+                return Array.from({ length: 5 }, () => mockInt(prop));
+            }
+
             return mockInt(prop);
         }
         case KnownType.STRING: {
+            if (prop.ref.isList) {
+                return Array.from({ length: 5 }, () => mockString(prop));
+            }
+
             return mockString(prop);
         }
         default: {
+            if (prop.ref.isList) {
+                return Array.from(
+                    { length: 5 },
+                    () => random(type.members).content
+                );
+            }
+
             return random(type.members).content;
         }
     }

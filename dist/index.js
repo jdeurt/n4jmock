@@ -9,9 +9,12 @@ import { transpile } from "./lib/transpile.js";
 import { CompilationError } from "./lib/errors/compilation-error.js";
 import { options } from "./globals.js";
 import chalk from "chalk";
+import { getFlag } from "./utils/get-flag.js";
+import { KnownFlags } from "./constants/known-flags.js";
 const entrypoint = process.argv[2];
-const flag = process.argv[3];
-options.verbose = flag === "--verbose" || flag === "-v";
+options.verbose = getFlag(process.argv, KnownFlags.VERBOSE) ?? false;
+options.properties = getFlag(process.argv, KnownFlags.PROPERTIES) ?? 1;
+options.relationships = getFlag(process.argv, KnownFlags.RELATIONSHIPS) ?? 1;
 if (!entrypoint) {
     panic("No entrypoint specified.");
 }
@@ -35,7 +38,7 @@ try {
 }
 catch (error) {
     if (error instanceof CompilationError) {
-        panic(chalk.red(`[${error.name}] ${error.message}`));
+        panic(error.message);
     }
     throw error;
 }

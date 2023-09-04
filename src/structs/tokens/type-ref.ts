@@ -5,4 +5,5 @@ export interface TypeRefToken extends Token {
     [tokenSymbol]: TokenKind.TYPE_REF;
 
     id: string;
+    isList: boolean;
 }

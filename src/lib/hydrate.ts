@@ -1,4 +1,4 @@
-import type { HydratedLabelToken } from "../structs/tokens/hydrated-label.js";
+import type { HydratedLabel } from "../structs/hydrated-label.js";
 import type { LabelToken } from "../structs/tokens/label.js";
 import { log } from "../utils/log.js";
 import { CompilationError } from "./errors/compilation-error.js";
@@ -6,7 +6,7 @@ import { createHydratedLabel } from "./utils/create-hydrated-token.js";
 
 export const hydrate = (
     knownLabels: Map<string, LabelToken>,
-    hydratedLabels: Map<string, HydratedLabelToken>
+    hydratedLabels: Map<string, HydratedLabel>
 ) => {
     for (const label of knownLabels.values()) {
         hydrateLabel(label, knownLabels, hydratedLabels);
@@ -16,11 +16,12 @@ export const hydrate = (
 const hydrateLabel = (
     label: LabelToken,
     knownLabels: Map<string, LabelToken>,
-    hydratedLabels: Map<string, HydratedLabelToken>,
+    hydratedLabels: Map<string, HydratedLabel>,
     seen = new Set<string>()
-): void => {
+): string[] => {
     if (hydratedLabels.has(label.id.name)) {
-        return;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return hydratedLabels.get(label.id.name)!.inheritanceChain;
     }
 
     log(`Hydrating label ${label.id.name}`);
@@ -41,9 +42,12 @@ const hydrateLabel = (
 
     // Base case
     if (label.extending === undefined) {
-        hydratedLabels.set(label.id.name, createHydratedLabel(label, [], []));
+        hydratedLabels.set(
+            label.id.name,
+            createHydratedLabel(label, [label.id.name], [], [])
+        );
 
-        return;
+        return [label.id.name];
     }
 
     const parentLabelId = label.extending.id;
@@ -94,6 +98,7 @@ const hydrateLabel = (
 
     const hydratedLabel = createHydratedLabel(
         label,
+        [label.id.name, ...hydratedParent.inheritanceChain],
         parentProperties,
         parentRelationships
     );
@@ -111,4 +116,6 @@ const hydrateLabel = (
     log(`Hydrated: ${[...seen].join(" -> ")}`);
 
     hydratedLabels.set(hydratedLabel.id.name, hydratedLabel);
+
+    return hydratedLabel.inheritanceChain;
 };
