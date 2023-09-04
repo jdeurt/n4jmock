@@ -11,7 +11,7 @@
         "dev": "tsc && node dist/index.js",
         "make": "peggy -o shared/n4jm-parser.cjs shared/n4jm.pegjs",
         "test": "jest",
-        "preinstall": "tsc"
+        "prepublish": "yarn make && tsc"
     },
     "devDependencies": {
         "@jdeurt/eslint-config": "^3.3.0",
