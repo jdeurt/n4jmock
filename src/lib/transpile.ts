@@ -84,6 +84,7 @@ function buildNodeCreationQueries(
             if (type === undefined) {
                 throw new CompilationError(`Unknown type: ${property.ref.id}`, {
                     tip: `Types must be one of "string", "int", "float", "bool", or a defined enum.`,
+                    cause: property.ref.location,
                 });
             }
 
