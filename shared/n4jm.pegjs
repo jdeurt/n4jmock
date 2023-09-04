@@ -1,9 +1,10 @@
 {{
 	const tokenSymbol = Symbol.for("@n4jm/token")
 	
-	function _token(kind, data) {
+	function _token(kind, data, location) {
     	return {
         	[tokenSymbol]: kind,
+            location,
             ...data
         }
     }
@@ -20,38 +21,32 @@
     };
 
     const Token = {
-        TAG: (id, data) => _token("tag", { id, data }),
-        IMPORT: (path) => _token("import", { path }),
-        ABSTRACT_LABEL: (id, properties, extending = undefined) => _token("abstract-label", { id, properties, extending }),
-        LABEL: (id, properties, relationships, extending = undefined) => _token("label", { id, properties, relationships, extending }),
-        PROPERTY: (id, ref, tags) => _token("property", { id, ref, tags }),
-        RELATIONSHIP: (id, direction, refs, tags) => _token("relationship", { id, direction, refs, tags }),
-        ENUM: (id, members) => _token("enum", { id, members }),
-        LABEL_REF: (id) => _token("label-ref", { id }),
-        TYPE_REF: (id) => _token("type-ref", { id })
+        TAG: (id, data, location) => _token("tag", { id, data }, location),
+        LABEL: (id, properties, relationships, location, abstract = false, extending = undefined) => _token("label", { id, properties, relationships, abstract, extending }, location),
+        PROPERTY: (id, ref, tags, location) => _token("property", { id, ref, tags }, location),
+        RELATIONSHIP: (id, direction, refs, tags, location) => _token("relationship", { id, direction, refs, tags }, location),
+        ENUM: (id, members, location) => _token("enum", { id, members }, location),
+        LABEL_REF: (id, location) => _token("label-ref", { id }, location),
+        TYPE_REF: (id, location) => _token("type-ref", { id }, location),
+        DATA: (content, location) => _token("data", { content }, location),
+        ID: (name, location) => _token("id", { name }, location)
     };
 }}
 
-start = imports:(@importList eol)? declarations:(labelDecl / enumDecl)|.., eol| eol? {
-	return { imports, declarations }
+start = declarations:(labelDecl / enumDecl)|.., eol| eol? {
+	return { declarations }
 }
 
 // utils
 word "word" = $[a-z0-9_]i+
-id "identifier" = $[a-z_]i+
+id "identifier" = name:$([a-z_]i [a-z0-9_]i*) { return Token.ID(name, location()) }
 _ "whitespace" = [ \t]*
 eol "end of line" = (comment? [\n\t ])+
-path "file path" = $([a-z0-9_-]i+)|1.., "/"|
 strLiteral "string literal" = '"' inner:$[^"]* '"' { return inner }
-data "data" = word / strLiteral
-tag "property tag" = "@" id:id data:("(" @data|.., listDelim| ")")? { return Token.TAG(id, data) }
+tag "property tag" = "@" id:$id data:("(" @data|.., listDelim| ")")? { return Token.TAG(id, data ?? [], location()) }
 listDelim = _ "," _
 
-importList "import statement list" = importStmt|1.., eol|
-importStmt "import statement" = "import" _ path:importPath { return Token.IMPORT(path) }
-importPath "import path" = path
-
-labelDecl = abstr:("abstract" _)? meta:labelDeclHeader _ data:("{" eol @labelDeclBody eol "}" / "{" _ "}") _ {
+labelDecl "label declaration" = abstr:("abstract" _)? meta:labelDeclHeader _ data:("{" eol @labelDeclBody eol "}" / "{" _ "}") _ {
     const isAbstract = !!abstr;
     
     const id = meta.id;
@@ -68,25 +63,28 @@ labelDecl = abstr:("abstract" _)? meta:labelDeclHeader _ data:("{" eol @labelDec
         }
     }
 
-    return isAbstract
-        ? Token.ABSTRACT_LABEL(id, properties, extending ? Token.LABEL_REF(extending) : undefined)
-        : Token.LABEL(id, properties, relationships, extending ? Token.LABEL_REF(extending) : undefined);
+    return Token.LABEL(id, properties, relationships, location(), isAbstract, extending ? extending : undefined);
 }
-labelDeclHeader = id:id extending:(_ ":" _ @id)? { return { id, extending } }
-labelDeclBody = _ attrs:(prop / rel)|.., eol| { return { attrs } }
+labelDeclHeader "label declaration header" = id:id extending:(_ ":" _ @labelRef)? { return { id, extending } }
+labelDeclBody "label declaration body" = _ attrs:(prop / rel)|.., eol| { return { attrs } }
 
-enumDecl = "enum" _ id:id _ "{" eol data:enumDeclBody eol "}" _ {
-    return Token.ENUM(id, data)
+enumDecl "enum declaration" = "enum" _ id:id _ "{" eol data:enumDeclBody eol "}" _ {
+    return Token.ENUM(id, data, location())
 }
-enumDeclBody = _ data:data|.., eol| { return data }
+enumDeclBody "enum declaraion body" = _ data:data|.., eol| { return data }
 
 prop "property" =
-    id:id _ ":" _ typeRef:id _ tags:tag|.., _| {
-        return Token.PROPERTY(id, Token.TYPE_REF(typeRef), tags)
+    id:$id _ ":" _ typeRef:typeRef _ tags:tag|.., _| {
+        return Token.PROPERTY(id, typeRef, tags, location())
     }
 rel "relationship" =
-    id:id _ direction:$("->" / "<-" / "<>" / "--") _ "[" _ refs:id|1.., listDelim| _ "]" _ tags:tag|.., _| {
-        return Token.RELATIONSHIP(id, direction, refs.map(Token.LABEL_REF), tags)
+    id:$id _ direction:$("->" / "<-" / "<>" / "--") _ "[" _ labelRefs:labelRef|1.., listDelim| _ "]" _ tags:tag|.., _| {
+        return Token.RELATIONSHIP(id, direction, labelRefs, tags, location())
     }
+
+labelRef "label" = id:$id { return Token.LABEL_REF(id, location()) }
+typeRef "type" = id:$id { return Token.TYPE_REF(id, location()) }
+
+data "data" = content:(word / strLiteral) { return Token.DATA(content, location()) }
 
 comment = _ "//" [^\n]*

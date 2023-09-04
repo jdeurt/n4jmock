@@ -1,12 +1,15 @@
 import { sourceCode } from "../../globals.js";
+import type { Location } from "../../structs/tokens/token.js";
 import { normalize } from "../../utils/normalize.js";
 
 interface CompilationErrorOptions {
-    cause?: { filePath: string; line: number; column: number };
+    cause?: Location;
     tip?: string;
 }
 
 export class CompilationError extends Error {
+    name = "CompilationError";
+
     constructor(message: string, options?: CompilationErrorOptions) {
         if (options === undefined) {
             super(message);
@@ -17,17 +20,16 @@ export class CompilationError extends Error {
                 ${options.tip ?? ""}
             `);
         } else {
-            const { filePath, line, column } = options.cause;
+            const { source, start } = options.cause;
 
-            const problemCode = sourceCode.files[filePath].lines[line];
+            const problemCode = sourceCode.files[source].lines[start.line - 1];
 
             super(normalize`
                 ${message}
 
-                ${filePath}:${line}:${column}
-                ${line} | ${problemCode}
-                ${" ".repeat(String(line).length + 3 + column)}^
-
+                ${source}:${start.line}:${start.column}
+                ${start.line} | ${problemCode}
+                ${" ".repeat(String(start.line).length + 2 + start.column)}^
                 ${options.tip ?? ""}
             `);
         }

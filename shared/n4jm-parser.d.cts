@@ -1,3 +1,6 @@
 import type { Result } from "../src/structs/result.js";
 
-export function parse(code: string): Result;
+export function parse(
+    code: string,
+    options?: { grammarSource: string }
+): Result;

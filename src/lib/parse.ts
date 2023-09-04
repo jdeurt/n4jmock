@@ -1,82 +1,63 @@
 import path from "node:path";
 import type { KnownType } from "../constants/known-type.js";
-import type { AbstractLabelToken } from "../structs/tokens/abstract-label.js";
 import type { EnumToken } from "../structs/tokens/enum.js";
 import type { LabelToken } from "../structs/tokens/label.js";
 import * as parser from "../../shared/n4jm-parser.cjs";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { CompilationError } from "./errors/compilation-error.js";
 import { tokenSymbol } from "../constants/symbols.js";
 import { TokenKind } from "../structs/tokens/token.js";
+import { globIterateSync } from "glob";
+import { log } from "../utils/log.js";
+import { sourceCode } from "../globals.js";
 
 export const parse = (
     entrypoint: string,
-    knownLabels: Map<string, AbstractLabelToken | LabelToken>,
+    knownLabels: Map<string, LabelToken>,
     knownTypes: Map<string, EnumToken | KnownType>
-    // eslint-disable-next-line sonarjs/cognitive-complexity
 ) => {
     const baseDir = path.dirname(entrypoint);
 
-    const seen = new Set(entrypoint);
+    log(`Parsing N4JM schema definitions in ${baseDir}`);
 
-    const scanQueue = [entrypoint];
+    for (const modulePath of globIterateSync(`${baseDir}/**/*.n4jm`)) {
+        log(`Parsing module: ${modulePath}`);
 
-    while (scanQueue.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const module = scanQueue.shift()!;
+        const content = readFileSync(modulePath, "utf8");
 
-        if (seen.has(module)) {
-            continue;
-        }
+        sourceCode.files[modulePath] = { lines: content.split("\n") };
 
-        seen.add(module);
-
-        const { imports, declarations } = parser.parse(
-            readFileSync(module, "utf8")
-        );
-
-        if (imports) {
-            for (const { path: importPath } of imports) {
-                const resolvedImportPath =
-                    path.resolve(baseDir, importPath) + ".n4jm";
-
-                if (!existsSync(resolvedImportPath)) {
-                    throw new CompilationError(
-                        `Module '${resolvedImportPath}' not found.`,
-                        {
-                            tip:
-                                "Modules are resolved relative to the entry point's directory. " +
-                                "For example, if your entry point is 'foo/bar/main.n4jm' then an import 'baz' would be resolved as 'foo/bar/baz.n4jm'.",
-                        }
-                    );
-                }
-
-                scanQueue.push(resolvedImportPath);
-            }
-        }
+        const { declarations } = parser.parse(content, {
+            grammarSource: modulePath,
+        });
 
         for (const declaration of declarations) {
             switch (declaration[tokenSymbol]) {
-                case TokenKind.ABSTRACT_LABEL:
                 case TokenKind.LABEL: {
-                    if (knownLabels.has(declaration.id)) {
+                    if (knownLabels.has(declaration.id.name)) {
                         throw new CompilationError(
-                            `Duplicate label definition: ${declaration.id}.`
+                            `Duplicate label definition: ${declaration.id.name}.`,
+                            { cause: declaration.id.location }
                         );
                     }
 
-                    knownLabels.set(declaration.id, declaration);
+                    log(`Found label declaration: ${declaration.id.name}`);
+
+                    knownLabels.set(declaration.id.name, declaration);
 
                     break;
                 }
                 case TokenKind.ENUM: {
-                    if (knownTypes.has(declaration.id)) {
+                    if (knownTypes.has(declaration.id.name)) {
                         throw new CompilationError(
-                            `Duplicate enum definition: ${declaration.id}.`
+                            `Duplicate enum definition: ${declaration.id.name}.`,
+                            { cause: declaration.id.location }
                         );
                     }
 
-                    knownTypes.set(declaration.id, declaration);
+                    log(`Found enum declaration: ${declaration.id.name}`);
+
+                    knownTypes.set(declaration.id.name, declaration);
                 }
             }
         }

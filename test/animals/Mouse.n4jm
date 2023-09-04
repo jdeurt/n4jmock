@@ -1,3 +1,0 @@
-import animals/Animal
-
-Mouse : Animal {}

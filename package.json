@@ -1,13 +1,17 @@
 {
-    "name": "n4jmock",
+    "name": "n4jm",
     "version": "1.0.0",
     "main": "index.js",
     "license": "MIT",
     "type": "module",
+    "bin": {
+        "n4jm": "dist/index.js"
+    },
     "scripts": {
         "dev": "tsc && node dist/index.js",
         "make": "peggy -o shared/n4jm-parser.cjs shared/n4jm.pegjs",
-        "test": "jest"
+        "test": "jest",
+        "preinstall": "yarn make && tsc"
     },
     "devDependencies": {
         "@jdeurt/eslint-config": "^3.3.0",
@@ -22,6 +26,8 @@
         "typescript": "^5.2.2"
     },
     "dependencies": {
-        "@faker-js/faker": "^8.0.2"
+        "@faker-js/faker": "^8.0.2",
+        "chalk": "^5.3.0",
+        "glob": "^10.3.4"
     }
 }

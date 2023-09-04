@@ -1,0 +1,5 @@
+abstract Animal {
+    id: string @uuid
+    name: string
+    code: string @binary
+}

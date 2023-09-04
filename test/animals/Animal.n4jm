@@ -1,3 +1,0 @@
-abstract Animal {
-    name: string
-}

@@ -1,22 +1,19 @@
 import type { KnownType } from "../constants/known-type.js";
-import type { AbstractLabelToken } from "../structs/tokens/abstract-label.js";
 import type { EnumToken } from "../structs/tokens/enum.js";
-import type { LabelToken } from "../structs/tokens/label.js";
-import { TokenKind } from "../structs/tokens/token.js";
 import type { CypherSerializable } from "../types/cypher-serializable.js";
-import { is } from "./utils/kind.js";
 import { mock } from "./utils/mock-type.js";
 import { CypherQuery } from "./cypher/cypher-query.js";
 import { Node } from "./cypher/node.js";
 import { Relationship } from "./cypher/relationship.js";
 import { CompilationError } from "./errors/compilation-error.js";
+import type { HydratedLabelToken } from "../structs/tokens/hydrated-label.js";
 
 /**
  * Assumes the passed labels are already hydrated.
  * That is, they have been populated with the properties of their parent.
  */
 export const transpile = (
-    hydratedLabels: Map<string, LabelToken | AbstractLabelToken>,
+    hydratedLabels: Map<string, HydratedLabelToken>,
     types: Map<string, EnumToken | KnownType>
 ): string => {
     const query = new CypherQuery();
@@ -29,11 +26,11 @@ export const transpile = (
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function buildRelationshipQueries(
-    hydratedLabels: Map<string, LabelToken | AbstractLabelToken>,
+    hydratedLabels: Map<string, HydratedLabelToken>,
     query: CypherQuery
 ) {
     for (const label of hydratedLabels.values()) {
-        if (is(label, TokenKind.ABSTRACT_LABEL)) {
+        if (label.isAbstract) {
             continue;
         }
 
@@ -42,21 +39,24 @@ function buildRelationshipQueries(
                 const refLabel = hydratedLabels.get(ref.id);
 
                 if (!refLabel) {
-                    throw new CompilationError(`Unknown target: ${ref.id}`);
+                    throw new CompilationError(`Unknown target: ${ref.id}`, {
+                        cause: ref.location,
+                    });
                 }
 
-                if (is(refLabel, TokenKind.ABSTRACT_LABEL)) {
+                if (refLabel.isAbstract) {
                     throw new CompilationError(`Invalid target: ${ref.id}`, {
                         tip:
                             "Abstract labels cannot be used as a relationship target since they are not included in the resulting query. " +
                             "If you want to use this label as a target, remove the 'abstract' keyword.",
+                        cause: ref.location,
                     });
                 }
 
                 query.addRelationship(
                     new Relationship(
-                        label.id,
-                        refLabel.id,
+                        label.id.name,
+                        refLabel.id.name,
                         relationship.id,
                         relationship.direction
                     )
@@ -67,12 +67,12 @@ function buildRelationshipQueries(
 }
 
 function buildNodeCreationQueries(
-    hydratedLabels: Map<string, LabelToken | AbstractLabelToken>,
+    hydratedLabels: Map<string, HydratedLabelToken>,
     types: Map<string, EnumToken | KnownType>,
     query: CypherQuery
 ) {
     for (const label of hydratedLabels.values()) {
-        if (is(label, TokenKind.ABSTRACT_LABEL)) {
+        if (label.isAbstract) {
             continue;
         }
 
@@ -90,6 +90,6 @@ function buildNodeCreationQueries(
             mockedProps[property.id] = mock(type, property);
         }
 
-        query.addNode(new Node(label.id).set(mockedProps));
+        query.addNode(new Node(label.id.name).set(mockedProps));
     }
 }

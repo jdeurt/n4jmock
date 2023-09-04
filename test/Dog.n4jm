@@ -1,0 +1,5 @@
+Dog : Animal {
+    breed: string
+
+    chases -> [Cat]
+}

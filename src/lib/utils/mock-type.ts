@@ -19,8 +19,8 @@ export const mockBool = (prop: PropertyToken) => {
 };
 
 export const mockFloat = (prop: PropertyToken) => {
-    const min = KnownTag.min(prop)?.data[0] ?? 0;
-    const max = KnownTag.max(prop)?.data[0] ?? 1;
+    const min = KnownTag.min(prop)?.data[0]?.content ?? 0;
+    const max = KnownTag.max(prop)?.data[0]?.content ?? 1;
 
     return faker.number.float({
         min: Number(min),
@@ -33,8 +33,8 @@ export const mockInt = (prop: PropertyToken) => {
         return Date.now();
     }
 
-    const min = KnownTag.min(prop)?.data[0] ?? 0;
-    const max = KnownTag.max(prop)?.data[0] ?? Number.MAX_SAFE_INTEGER;
+    const min = KnownTag.min(prop)?.data[0]?.content ?? 0;
+    const max = KnownTag.max(prop)?.data[0]?.content ?? Number.MAX_SAFE_INTEGER;
 
     return faker.number.int({
         min: Number(min),
@@ -51,8 +51,8 @@ export const mockString = (prop: PropertyToken) => {
     const uuidTag = KnownTag.uuid(prop);
 
     if (alphaTag) {
-        const lengthOrMin = alphaTag.data[0];
-        const max = alphaTag.data[1];
+        const lengthOrMin = alphaTag.data[0]?.content;
+        const max = alphaTag.data[1]?.content;
 
         if (max) {
             return faker.string.alpha({
@@ -60,16 +60,14 @@ export const mockString = (prop: PropertyToken) => {
             });
         }
 
-        if (lengthOrMin) {
-            return faker.string.alpha({
-                length: Number(lengthOrMin),
-            });
-        }
+        return faker.string.alpha({
+            length: Number(lengthOrMin || 10),
+        });
     }
 
     if (numericTag) {
-        const lengthOrMin = numericTag.data[0];
-        const max = numericTag.data[1];
+        const lengthOrMin = numericTag.data[0]?.content;
+        const max = numericTag.data[1]?.content;
 
         if (max) {
             return faker.string.numeric({
@@ -77,16 +75,14 @@ export const mockString = (prop: PropertyToken) => {
             });
         }
 
-        if (lengthOrMin) {
-            return faker.string.numeric({
-                length: Number(lengthOrMin),
-            });
-        }
+        return faker.string.numeric({
+            length: Number(lengthOrMin || 10),
+        });
     }
 
     if (alphanumericTag) {
-        const lengthOrMin = alphanumericTag.data[0];
-        const max = alphanumericTag.data[1];
+        const lengthOrMin = alphanumericTag.data[0]?.content;
+        const max = alphanumericTag.data[1]?.content;
 
         if (max) {
             return faker.string.alphanumeric({
@@ -94,16 +90,14 @@ export const mockString = (prop: PropertyToken) => {
             });
         }
 
-        if (lengthOrMin) {
-            return faker.string.alphanumeric({
-                length: Number(lengthOrMin),
-            });
-        }
+        return faker.string.alphanumeric({
+            length: Number(lengthOrMin || 10),
+        });
     }
 
     if (binaryTag) {
-        const lengthOrMin = binaryTag.data[0];
-        const max = binaryTag.data[1];
+        const lengthOrMin = binaryTag.data[0]?.content;
+        const max = binaryTag.data[1]?.content;
 
         if (max) {
             return faker.string.binary({
@@ -111,11 +105,9 @@ export const mockString = (prop: PropertyToken) => {
             });
         }
 
-        if (lengthOrMin) {
-            return faker.string.binary({
-                length: Number(lengthOrMin),
-            });
-        }
+        return faker.string.binary({
+            length: Number(lengthOrMin || 10),
+        });
     }
 
     if (uuidTag) {
@@ -140,7 +132,7 @@ export const mock = (type: KnownType | EnumToken, prop: PropertyToken) => {
             return mockString(prop);
         }
         default: {
-            return random(type.members);
+            return random(type.members).content;
         }
     }
 };
