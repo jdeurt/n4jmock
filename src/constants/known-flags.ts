@@ -10,4 +10,5 @@ export const KnownFlags = {
         string,
         NumberConstructor,
     ],
+    OUT: ["out", "o", String] as [string, string, StringConstructor],
 };

@@ -1,6 +1,5 @@
 Dog : Animal {
     breed: string
-    bones: string[]
 
-    chases <> [Cat, Mouse]
+    chases -> [Cat, Mouse]
 }

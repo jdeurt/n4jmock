@@ -86,12 +86,8 @@ rel "relationship" =
 labelRef "label" = id:$id { return Token.LABEL_REF(id, location()) }
 typeRef "type" = id:$id isList:"[]"? { return Token.TYPE_REF(id, !!isList, location()) }
 
-data "data" = strContent:(word / strLiteral) / numContent:numLiteral {
-    if (!!strContent) {
-        return Token.DATA(strContent, String, location())
-    }
-
-    return Token.DATA(numContent, Number, location())
-}
+data "data" =
+    strContent:(word / strLiteral) { return Token.DATA(strContent, String, location()) }
+    / numContent:numLiteral { return Token.DATA(numContent, Number, location()) }
 
 comment = _ "//" [^\n]*

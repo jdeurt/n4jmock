@@ -21,6 +21,7 @@ const entrypoint = process.argv[2];
 options.verbose = getFlag(process.argv, KnownFlags.VERBOSE) ?? false;
 options.properties = getFlag(process.argv, KnownFlags.PROPERTIES) ?? 1;
 options.relationships = getFlag(process.argv, KnownFlags.RELATIONSHIPS) ?? 1;
+options.out = getFlag(process.argv, KnownFlags.OUT) ?? "./query.cypher";
 
 if (!entrypoint) {
     panic("No entrypoint specified.");
@@ -50,7 +51,11 @@ try {
 
     const result = transpile(hydratedLabels, knownTypes);
 
-    console.log(chalk.green(result));
+    const outPath = path.resolve(options.out);
+
+    fs.writeFileSync(outPath, result, "utf8");
+
+    console.log(`Query saved to ${outPath}`);
 } catch (error) {
     if (error instanceof CompilationError) {
         panic(error.message);

@@ -321,13 +321,8 @@ function peg$parse(input, options) {
     };
   var peg$f11 = function(id) { return Token.LABEL_REF(id, location()) };
   var peg$f12 = function(id, isList) { return Token.TYPE_REF(id, !!isList, location()) };
-  var peg$f13 = function(numContent) {
-    if (!!strContent) {
-        return Token.DATA(strContent, String, location())
-    }
-
-    return Token.DATA(numContent, Number, location())
-};
+  var peg$f13 = function(strContent) { return Token.DATA(strContent, String, location()) };
+  var peg$f14 = function(numContent) { return Token.DATA(numContent, Number, location()) };
   var peg$currPos = 0;
   var peg$savedPos = 0;
   var peg$posDetailsCache = [{ line: 1, column: 1 }];
@@ -1565,16 +1560,22 @@ function peg$parse(input, options) {
     var s0, s1;
 
     peg$silentFails++;
-    s0 = peg$parseword();
-    if (s0 === peg$FAILED) {
-      s0 = peg$parsestrLiteral();
+    s0 = peg$currPos;
+    s1 = peg$parseword();
+    if (s1 === peg$FAILED) {
+      s1 = peg$parsestrLiteral();
     }
+    if (s1 !== peg$FAILED) {
+      peg$savedPos = s0;
+      s1 = peg$f13(s1);
+    }
+    s0 = s1;
     if (s0 === peg$FAILED) {
       s0 = peg$currPos;
       s1 = peg$parsenumLiteral();
       if (s1 !== peg$FAILED) {
         peg$savedPos = s0;
-        s1 = peg$f13(s1);
+        s1 = peg$f14(s1);
       }
       s0 = s1;
     }

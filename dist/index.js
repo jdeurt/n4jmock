@@ -8,13 +8,13 @@ import { hydrate } from "./lib/hydrate.js";
 import { transpile } from "./lib/transpile.js";
 import { CompilationError } from "./lib/errors/compilation-error.js";
 import { options } from "./globals.js";
-import chalk from "chalk";
 import { getFlag } from "./utils/get-flag.js";
 import { KnownFlags } from "./constants/known-flags.js";
 const entrypoint = process.argv[2];
 options.verbose = getFlag(process.argv, KnownFlags.VERBOSE) ?? false;
 options.properties = getFlag(process.argv, KnownFlags.PROPERTIES) ?? 1;
 options.relationships = getFlag(process.argv, KnownFlags.RELATIONSHIPS) ?? 1;
+options.out = getFlag(process.argv, KnownFlags.OUT) ?? "./query.cypher";
 if (!entrypoint) {
     panic("No entrypoint specified.");
 }
@@ -34,7 +34,9 @@ try {
     parse(entrypointPath, knownLabels, knownTypes);
     hydrate(knownLabels, hydratedLabels);
     const result = transpile(hydratedLabels, knownTypes);
-    console.log(chalk.green(result));
+    const outPath = path.resolve(options.out);
+    fs.writeFileSync(outPath, result, "utf8");
+    console.log(`Query saved to ${outPath}`);
 }
 catch (error) {
     if (error instanceof CompilationError) {

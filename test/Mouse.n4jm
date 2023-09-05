@@ -1,1 +1,7 @@
-Mouse : Animal {}
+enum MouseFood {
+    cheese
+}
+
+Mouse : Animal {
+    eats: MouseFood
+}
