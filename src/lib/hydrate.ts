@@ -3,6 +3,11 @@ import type { LabelToken } from "../structs/tokens/label.js";
 import { log } from "../utils/log.js";
 import { CompilationError } from "./errors/compilation-error.js";
 import { createHydratedLabel } from "./utils/create-hydrated-token.js";
+import {
+    validateModifiers,
+    validateProperties,
+    validateRelationships,
+} from "./utils/validation.js";
 
 export const hydrate = (
     knownLabels: Map<string, LabelToken>,
@@ -18,10 +23,9 @@ const hydrateLabel = (
     knownLabels: Map<string, LabelToken>,
     hydratedLabels: Map<string, HydratedLabel>,
     seen = new Set<string>()
-): string[] => {
+) => {
     if (hydratedLabels.has(label.id.name)) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return hydratedLabels.get(label.id.name)!.inheritanceChain;
+        return;
     }
 
     log(`Hydrating label ${label.id.name}`);
@@ -42,12 +46,9 @@ const hydrateLabel = (
 
     // Base case
     if (label.extending === undefined) {
-        hydratedLabels.set(
-            label.id.name,
-            createHydratedLabel(label, [label.id.name], [], [])
-        );
+        hydratedLabels.set(label.id.name, createHydratedLabel(label));
 
-        return [label.id.name];
+        return;
     }
 
     const parentLabelId = label.extending.id;
@@ -69,53 +70,9 @@ const hydrateLabel = (
         );
     }
 
-    const parentProperties = hydratedParent.properties;
-    const parentRelationships = hydratedParent.relationships;
-
-    for (const parentProp of parentProperties) {
-        if (label.properties.some((prop) => prop.id === parentProp.id)) {
-            throw new CompilationError(
-                `Invalid property: ${label.id.name}.${parentProp.id}`,
-                {
-                    tip: `The property ${parentProp.id} has already been defined in ${label.id.name}'s parent.`,
-                    cause: parentProp.location,
-                }
-            );
-        }
-    }
-
-    for (const parentRel of parentRelationships) {
-        if (label.relationships.some((rel) => rel.id === parentRel.id)) {
-            throw new CompilationError(
-                `Invalid relationship: ${label.id.name}.${parentRel.id}`,
-                {
-                    tip: `The relationship ${parentRel.id} has already been defined in ${label.id.name}'s parent.`,
-                    cause: parentRel.location,
-                }
-            );
-        }
-    }
-
-    const hydratedLabel = createHydratedLabel(
-        label,
-        [label.id.name, ...hydratedParent.inheritanceChain],
-        parentProperties,
-        parentRelationships
-    );
-
-    if (hydratedLabel.abstract && hydratedLabel.relationships.length > 0) {
-        throw new CompilationError(
-            `Unexpected relationship in abstract label: ${hydratedLabel.id.name}.${hydratedLabel.relationships[0].id}`,
-            {
-                tip: "Abstract labels cannot contain relationships since they are not included in the resulting query.",
-                cause: hydratedLabel.relationships[0].location,
-            }
-        );
-    }
+    const hydratedLabel = createHydratedLabel(label, hydratedParent);
 
     log(`Hydrated: ${[...seen].join(" -> ")}`);
 
     hydratedLabels.set(hydratedLabel.id.name, hydratedLabel);
-
-    return hydratedLabel.inheritanceChain;
 };

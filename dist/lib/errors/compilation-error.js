@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import { sourceCode } from "../../globals.js";
 import { normalize } from "../../utils/normalize.js";
+import { printSource } from "../../utils/print-source.js";
 export class CompilationError extends Error {
     // eslint-disable-next-line sonarjs/cognitive-complexity
     constructor(message, options) {
@@ -15,27 +15,13 @@ export class CompilationError extends Error {
             `);
         }
         else {
-            const { source, start, end } = options.cause;
-            const maxLineNumLen = String(end.line).length;
-            const lines = sourceCode.files[source].split("\n");
-            let highlightedSourceCode = "";
-            for (let i = start.line; i <= end.line; i++) {
-                const line = lines[i - 1];
-                const preError = line.slice(0, i === start.line ? start.column - 1 : 0);
-                const errorPart = line.slice(i === start.line ? start.column - 1 : 0, i === end.line ? end.column - 1 : line.length);
-                const postError = line.slice(i === end.line ? end.column - 1 : line.length);
-                highlightedSourceCode +=
-                    preError + chalk.red(errorPart) + postError;
-            }
-            highlightedSourceCode = highlightedSourceCode
-                .split("\n")
-                .map((line, i) => `${String(start.line + i).padStart(maxLineNumLen)} | ${line}`)
-                .join("\n");
+            const causeArr = Array.isArray(options.cause)
+                ? options.cause
+                : [options.cause];
             super(normalize `
                 ${chalk.red(message)}
 
-                ${source}:${start.line}:${start.column}
-                ${highlightedSourceCode}
+                ${causeArr.map((cause) => printSource(cause)).join("\n\n")}
 
                 ${chalk.blueBright(options.tip ?? "")}
             `);
