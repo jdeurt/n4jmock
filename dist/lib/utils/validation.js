@@ -1,6 +1,6 @@
 import { CompilationError } from "../errors/compilation-error.js";
 export const validateModifiers = (label, parent) => {
-    if (label.abstract && parent?.abstract === true) {
+    if (label.abstract && parent?.abstract === false) {
         throw new CompilationError(`Invalid parent: ${label.id.name} -> ${parent.id.name}`, {
             tip: "An abstract label may not inherit from a concrete one.",
             cause: label.extending?.location,

@@ -6,7 +6,7 @@ export const validateModifiers = (
     label: LabelToken,
     parent?: HydratedLabel
 ) => {
-    if (label.abstract && parent?.abstract === true) {
+    if (label.abstract && parent?.abstract === false) {
         throw new CompilationError(
             `Invalid parent: ${label.id.name} -> ${parent.id.name}`,
             {
