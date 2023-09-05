@@ -1,4 +1,3 @@
-import { options } from "../../globals.js";
 import type { CypherSerializable } from "../../types/cypher-serializable.js";
 import { Direction } from "../../types/direction.js";
 
