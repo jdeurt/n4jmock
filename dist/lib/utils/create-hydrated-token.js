@@ -7,9 +7,10 @@ export const createHydratedLabel = (labelToken, parent) => {
     }
     return {
         id: labelToken.id,
-        inheritanceChain: parent?.abstract
-            ? []
-            : [labelToken.id.name, ...(parent?.inheritanceChain ?? [])],
+        inheritanceChain: [
+            labelToken.id.name,
+            ...(parent?.inheritanceChain ?? []),
+        ],
         abstract: labelToken.abstract,
         properties: [...labelToken.properties, ...(parent?.properties ?? [])],
         relationships: [

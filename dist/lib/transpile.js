@@ -27,13 +27,6 @@ function buildRelationshipQueries(hydratedLabels, query) {
                         cause: ref.location,
                     });
                 }
-                if (refLabel.abstract) {
-                    throw new CompilationError(`Invalid target: ${ref.id}`, {
-                        tip: "Abstract labels cannot be used as a relationship target since they are not included in the resulting query.\n" +
-                            "If you want to use this label as a target, remove the 'abstract' keyword.",
-                        cause: ref.location,
-                    });
-                }
                 query.addRelationship(new Relationship(label.id.name, refLabel.id.name, relationship.id, relationship.direction));
             }
         }

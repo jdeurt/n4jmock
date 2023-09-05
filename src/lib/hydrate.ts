@@ -3,11 +3,6 @@ import type { LabelToken } from "../structs/tokens/label.js";
 import { log } from "../utils/log.js";
 import { CompilationError } from "./errors/compilation-error.js";
 import { createHydratedLabel } from "./utils/create-hydrated-token.js";
-import {
-    validateModifiers,
-    validateProperties,
-    validateRelationships,
-} from "./utils/validation.js";
 
 export const hydrate = (
     knownLabels: Map<string, LabelToken>,

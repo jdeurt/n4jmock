@@ -31,7 +31,7 @@ export class QueryBuilder {
                     [Direction.OUT]: `(${idSource})-[:${label}]->(${idDest})\n`,
                     [Direction.UNDIRECTED]: `(${idSource})-[:${label}]-(${idDest})\n`,
                     [Direction.BOTH]: `(${idSource})<-[:${label}]-(${idDest})\n` +
-                        `(${idSource})-[:${label}]->(${idDest})\n`,
+                        `CREATE (${idSource})-[:${label}]->(${idDest})\n`,
                 }[direction];
         return this;
     }
