@@ -19,4 +19,10 @@ export class Node extends QueryBuilder {
 
         return this;
     }
+
+    end(): this {
+        this._end();
+
+        return this;
+    }
 }

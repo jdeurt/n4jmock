@@ -5,10 +5,10 @@
     "license": "MIT",
     "type": "module",
     "bin": {
-        "n4jm": "dist/index.js"
+        "n4jm": "dist/cli.js"
     },
     "scripts": {
-        "dev": "tsc && node dist/index.js",
+        "dev": "tsc && node dist/cli.js",
         "make": "peggy -o shared/n4jm-parser.cjs shared/n4jm.pegjs",
         "test": "jest",
         "prepublish": "yarn make && tsc"
@@ -28,6 +28,7 @@
     "dependencies": {
         "@faker-js/faker": "^8.0.2",
         "chalk": "^5.3.0",
-        "glob": "^10.3.4"
+        "glob": "^10.3.4",
+        "yargs": "^17.7.2"
     }
 }

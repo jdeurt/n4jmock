@@ -1,5 +1,4 @@
 import type { Direction } from "../../types/direction.js";
-import type { Node } from "./node.js";
 import { QueryBuilder } from "./query-builder.js";
 
 export class Relationship extends QueryBuilder {
@@ -7,10 +6,19 @@ export class Relationship extends QueryBuilder {
         sourceLabel: string,
         destLabel: string,
         label: string,
-        direction: Direction
+        direction: Direction,
+        limit = 1
     ) {
         super();
 
-        this._createRelationship(sourceLabel, destLabel, label, direction);
+        this._createRelationship(
+            sourceLabel,
+            destLabel,
+            label,
+            direction,
+            limit
+        );
+
+        this._end();
     }
 }

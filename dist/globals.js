@@ -3,7 +3,8 @@ export const sourceCode = {
 };
 export const options = {
     verbose: false,
-    properties: 1,
+    nodes: 1,
     relationships: 1,
     out: "./query.cypher",
+    noFile: false,
 };

@@ -20,10 +20,11 @@ export class QueryBuilder {
             .join("")})\n`;
         return this;
     }
-    _createRelationship(sourceLabel, destLabel, label, direction) {
+    _createRelationship(sourceLabel, destLabel, label, direction, limit = 1) {
         const idSource = QueryBuilder.id(sourceLabel);
         const idDest = QueryBuilder.id(destLabel);
-        this.query += `MATCH (${idSource}:${sourceLabel}), (${idDest}:${destLabel})\n`;
+        this.query += `MATCH (${idSource}:${sourceLabel}) WITH * LIMIT ${limit}\n`;
+        this.query += `MATCH (${idDest}:${destLabel}) WITH * LIMIT ${limit}\n`;
         this.query +=
             "CREATE " +
                 {
@@ -52,5 +53,8 @@ export class QueryBuilder {
             this._set(id, key, value);
         }
         return this;
+    }
+    _end() {
+        this.query += ";\n";
     }
 }

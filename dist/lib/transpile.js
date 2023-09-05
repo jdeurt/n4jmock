@@ -3,6 +3,7 @@ import { CypherQuery } from "./cypher/cypher-query.js";
 import { Node } from "./cypher/node.js";
 import { Relationship } from "./cypher/relationship.js";
 import { CompilationError } from "./errors/compilation-error.js";
+import { options } from "../globals.js";
 /**
  * Assumes the passed labels are already hydrated.
  * That is, they have been populated with the properties of their parent.
@@ -27,7 +28,7 @@ function buildRelationshipQueries(hydratedLabels, query) {
                         cause: ref.location,
                     });
                 }
-                query.addRelationship(new Relationship(label.id.name, refLabel.id.name, relationship.id, relationship.direction));
+                query.addRelationship(new Relationship(label.id.name, refLabel.id.name, relationship.id, relationship.direction, options.relationships));
             }
         }
     }
@@ -37,17 +38,19 @@ function buildNodeCreationQueries(hydratedLabels, types, query) {
         if (label.abstract) {
             continue;
         }
-        const mockedProps = {};
-        for (const property of label.properties) {
-            const type = types.get(property.ref.id);
-            if (type === undefined) {
-                throw new CompilationError(`Unknown type: ${property.ref.id}`, {
-                    tip: `Types must be one of "string", "int", "float", "bool", or a defined enum.`,
-                    cause: property.ref.location,
-                });
+        for (let i = 0; i < options.nodes; i++) {
+            const mockedProps = {};
+            for (const property of label.properties) {
+                const type = types.get(property.ref.id);
+                if (type === undefined) {
+                    throw new CompilationError(`Unknown type: ${property.ref.id}`, {
+                        tip: `Types must be one of "string", "int", "float", "bool", or a defined enum.`,
+                        cause: property.ref.location,
+                    });
+                }
+                mockedProps[property.id] = mock(type, property);
             }
-            mockedProps[property.id] = mock(type, property);
+            query.addNode(new Node(label.inheritanceChain).set(mockedProps).end());
         }
-        query.addNode(new Node(label.inheritanceChain).set(mockedProps));
     }
 }

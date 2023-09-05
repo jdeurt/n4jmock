@@ -7,6 +7,7 @@ import { Node } from "./cypher/node.js";
 import { Relationship } from "./cypher/relationship.js";
 import { CompilationError } from "./errors/compilation-error.js";
 import type { HydratedLabel } from "../structs/hydrated-label.js";
+import { options } from "../globals.js";
 
 /**
  * Assumes the passed labels are already hydrated.
@@ -49,7 +50,8 @@ function buildRelationshipQueries(
                         label.id.name,
                         refLabel.id.name,
                         relationship.id,
-                        relationship.direction
+                        relationship.direction,
+                        options.relationships
                     )
                 );
             }
@@ -67,24 +69,31 @@ function buildNodeCreationQueries(
             continue;
         }
 
-        const mockedProps: Record<
-            string,
-            CypherSerializable | CypherSerializable[]
-        > = {};
+        for (let i = 0; i < options.nodes; i++) {
+            const mockedProps: Record<
+                string,
+                CypherSerializable | CypherSerializable[]
+            > = {};
 
-        for (const property of label.properties) {
-            const type = types.get(property.ref.id);
+            for (const property of label.properties) {
+                const type = types.get(property.ref.id);
 
-            if (type === undefined) {
-                throw new CompilationError(`Unknown type: ${property.ref.id}`, {
-                    tip: `Types must be one of "string", "int", "float", "bool", or a defined enum.`,
-                    cause: property.ref.location,
-                });
+                if (type === undefined) {
+                    throw new CompilationError(
+                        `Unknown type: ${property.ref.id}`,
+                        {
+                            tip: `Types must be one of "string", "int", "float", "bool", or a defined enum.`,
+                            cause: property.ref.location,
+                        }
+                    );
+                }
+
+                mockedProps[property.id] = mock(type, property);
             }
 
-            mockedProps[property.id] = mock(type, property);
+            query.addNode(
+                new Node(label.inheritanceChain).set(mockedProps).end()
+            );
         }
-
-        query.addNode(new Node(label.inheritanceChain).set(mockedProps));
     }
 }

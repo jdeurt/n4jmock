@@ -31,12 +31,14 @@ export abstract class QueryBuilder {
         sourceLabel: string,
         destLabel: string,
         label: string,
-        direction: Direction
+        direction: Direction,
+        limit = 1
     ): this {
         const idSource = QueryBuilder.id(sourceLabel);
         const idDest = QueryBuilder.id(destLabel);
 
-        this.query += `MATCH (${idSource}:${sourceLabel}), (${idDest}:${destLabel})\n`;
+        this.query += `MATCH (${idSource}:${sourceLabel}) WITH * LIMIT ${limit}\n`;
+        this.query += `MATCH (${idDest}:${destLabel}) WITH * LIMIT ${limit}\n`;
 
         this.query +=
             "CREATE " +
@@ -94,5 +96,9 @@ export abstract class QueryBuilder {
         }
 
         return this;
+    }
+
+    protected _end() {
+        this.query += ";\n";
     }
 }

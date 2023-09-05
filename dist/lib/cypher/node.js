@@ -10,4 +10,8 @@ export class Node extends QueryBuilder {
         this._set(this.id, props);
         return this;
     }
+    end() {
+        this._end();
+        return this;
+    }
 }
