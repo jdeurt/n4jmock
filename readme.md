@@ -2,7 +2,7 @@
 
 A DSL for mocking N4J data.
 
-Language support for VSCode is available [here](https://github.com/jdeurt/n4jm-language-support).
+Language support for VSCode is available here: https://github.com/jdeurt/n4jm-language-support.
 
 ## Usage
 
