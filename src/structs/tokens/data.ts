@@ -4,5 +4,5 @@ import type { Token, TokenKind } from "./token.js";
 export interface DataToken extends Token {
     [tokenSymbol]: TokenKind.DATA;
 
-    content: string;
+    content: string | number;
 }

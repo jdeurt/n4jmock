@@ -28,7 +28,7 @@
         ENUM: (id, members, location) => _token("enum", { id, members }, location),
         LABEL_REF: (id, location) => _token("label-ref", { id }, location),
         TYPE_REF: (id, isList, location) => _token("type-ref", { id, isList }, location),
-        DATA: (content, location) => _token("data", { content }, location),
+        DATA: (content, type, location) => _token("data", { content, type }, location),
         ID: (name, location) => _token("id", { name }, location)
     };
 }}
@@ -39,6 +39,7 @@ start = declarations:(labelDecl / enumDecl)|.., eol| eol? {
 
 // utils
 word "word" = $[a-z0-9_]i+
+numLiteral "number literal" = $([0-9]+ ("." [0-9]+)?)
 id "identifier" = name:$([a-z_]i [a-z0-9_]i*) { return Token.ID(name, location()) }
 _ "whitespace" = [ \t]*
 eol "end of line" = (comment? [\n\t ])+
@@ -85,6 +86,12 @@ rel "relationship" =
 labelRef "label" = id:$id { return Token.LABEL_REF(id, location()) }
 typeRef "type" = id:$id isList:"[]"? { return Token.TYPE_REF(id, !!isList, location()) }
 
-data "data" = content:(word / strLiteral) { return Token.DATA(content, location()) }
+data "data" = strContent:(word / strLiteral) / numContent:numLiteral {
+    if (!!strContent) {
+        return Token.DATA(strContent, String, location())
+    }
+
+    return Token.DATA(numContent, Number, location())
+}
 
 comment = _ "//" [^\n]*
